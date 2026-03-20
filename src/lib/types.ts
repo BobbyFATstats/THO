@@ -34,7 +34,12 @@ export type DiscussionTopic = {
   title: string;
   summary: string | null;
   confidence_score: number;
+  status: Status;
+  priority: Priority;
+  sort_order: number;
+  assignee: string | null;
   created_at: string;
+  updated_at: string;
 };
 
 export type Note = {
