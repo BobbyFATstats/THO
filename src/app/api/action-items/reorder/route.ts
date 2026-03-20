@@ -1,11 +1,8 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase";
-import { requireAuth, jsonError } from "@/lib/api";
+import { jsonError } from "@/lib/api";
 
 export async function PATCH(request: Request) {
-  const authError = await requireAuth();
-  if (authError) return authError;
-
   const body = await request.json();
   const items: { id: string; sort_order: number }[] = body.items;
 

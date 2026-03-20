@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase";
-import { requireAuth, jsonError } from "@/lib/api";
+import { jsonError } from "@/lib/api";
 import { extractMeetingData } from "@/lib/claude";
 import { MAX_REPROCESS_COUNT } from "@/lib/constants";
 
@@ -8,9 +8,6 @@ export async function POST(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const authError = await requireAuth();
-  if (authError) return authError;
-
   const { id } = await params;
   const supabase = createServiceClient();
 

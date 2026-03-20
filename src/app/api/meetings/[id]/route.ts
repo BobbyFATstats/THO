@@ -1,14 +1,9 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase";
-import { requireAuth } from "@/lib/api";
-
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const authError = await requireAuth();
-  if (authError) return authError;
-
   const { id } = await params;
   const supabase = createServiceClient();
 

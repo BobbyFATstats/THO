@@ -1,11 +1,8 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase";
-import { requireAuth, jsonError } from "@/lib/api";
+import { jsonError } from "@/lib/api";
 
 export async function GET(request: Request) {
-  const authError = await requireAuth();
-  if (authError) return authError;
-
   const { searchParams } = new URL(request.url);
   const meetingId = searchParams.get("meeting_id");
 
@@ -29,9 +26,6 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const authError = await requireAuth();
-  if (authError) return authError;
-
   const body = await request.json();
   const { content, author, meeting_id } = body;
 

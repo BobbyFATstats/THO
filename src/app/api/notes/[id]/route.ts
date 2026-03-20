@@ -1,14 +1,9 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase";
-import { requireAuth } from "@/lib/api";
-
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const authError = await requireAuth();
-  if (authError) return authError;
-
   const { id } = await params;
   const body = await request.json();
 
@@ -34,9 +29,6 @@ export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const authError = await requireAuth();
-  if (authError) return authError;
-
   const { id } = await params;
   const supabase = createServiceClient();
 

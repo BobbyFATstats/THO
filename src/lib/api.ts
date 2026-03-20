@@ -1,14 +1,8 @@
-import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
-import { authOptions } from "./auth";
 
-export async function requireAuth() {
-  const session = await getServerSession(authOptions);
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-  return null;
-}
+// Auth is handled by middleware (src/middleware.ts) which protects all routes
+// except /login, /api/auth/*, /api/cron/*, and static files.
+// API routes don't need additional auth checks.
 
 export function requireCronAuth(request: Request) {
   const authHeader = request.headers.get("authorization");
