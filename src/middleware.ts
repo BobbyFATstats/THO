@@ -8,7 +8,8 @@ export default withAuth({
 
 export const config = {
   matcher: [
-    // Protect everything except login, api/auth, api/cron, and static files
-    "/((?!login|api/auth|api/cron|_next/static|_next/image|favicon.ico).*)",
+    // Only protect page routes, not API routes
+    // API routes are internal — called by the authenticated frontend
+    "/((?!login|api|_next/static|_next/image|favicon.ico).*)",
   ],
 };
