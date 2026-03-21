@@ -35,6 +35,15 @@ type GHLData = {
       value: number;
       stage: string;
       createdAt: string;
+      address: string | null;
+      contractType: string | null;
+      contractSignedDate: string | null;
+      inspectionPeriodDays: string | null;
+      emdDueDate: string | null;
+      emdSent: string | null;
+      closeOfEscrow: string | null;
+      earnestMoney: string | null;
+      dealStatus: string | null;
     }[];
   };
   contacts: {
@@ -228,26 +237,104 @@ export default function CrmTrackerPage() {
               No active disposition deals
             </p>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {data.disposition.deals.map((deal) => (
                 <div
                   key={deal.id}
-                  className="flex items-center justify-between p-3 rounded-lg border"
+                  className="p-4 rounded-lg border space-y-3"
                 >
-                  <div>
-                    <p className="text-sm font-medium">{deal.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {format(new Date(deal.createdAt), "MMM d, yyyy")}
-                    </p>
+                  {/* Header row */}
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-sm font-medium">{deal.name}</p>
+                      {deal.address && (
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {deal.address}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {deal.contractType && (
+                        <Badge variant="outline" className="text-xs">
+                          {deal.contractType}
+                        </Badge>
+                      )}
+                      <StageBadge stage={deal.stage} />
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    {deal.value > 0 && (
-                      <span className="text-sm font-medium">
-                        ${deal.value.toLocaleString()}
-                      </span>
-                    )}
-                    <StageBadge stage={deal.stage} />
+
+                  <Separator />
+
+                  {/* Deal details grid */}
+                  <div className="grid grid-cols-5 gap-4 text-xs">
+                    <div>
+                      <p className="text-muted-foreground font-medium uppercase tracking-wider mb-1">
+                        Contract Signed
+                      </p>
+                      <p className={deal.contractSignedDate ? "" : "text-muted-foreground"}>
+                        {deal.contractSignedDate || "—"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground font-medium uppercase tracking-wider mb-1">
+                        Inspection Ends
+                      </p>
+                      <p className={deal.inspectionPeriodDays ? "" : "text-muted-foreground"}>
+                        {deal.inspectionPeriodDays ? `${deal.inspectionPeriodDays} days` : "—"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground font-medium uppercase tracking-wider mb-1">
+                        EMD Due
+                      </p>
+                      <p className={deal.emdDueDate ? "" : "text-muted-foreground"}>
+                        {deal.emdDueDate || "—"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground font-medium uppercase tracking-wider mb-1">
+                        EMD Sent
+                      </p>
+                      {deal.emdSent ? (
+                        <Badge
+                          variant="outline"
+                          className={`text-xs ${
+                            deal.emdSent.toLowerCase() === "yes"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
+                          }`}
+                        >
+                          {deal.emdSent}
+                        </Badge>
+                      ) : (
+                        <p className="text-muted-foreground">—</p>
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground font-medium uppercase tracking-wider mb-1">
+                        Close of Escrow
+                      </p>
+                      <p className={deal.closeOfEscrow ? "" : "text-muted-foreground"}>
+                        {deal.closeOfEscrow || "—"}
+                      </p>
+                    </div>
                   </div>
+
+                  {/* Bottom row: value + earnest money */}
+                  {(deal.value > 0 || deal.earnestMoney) && (
+                    <div className="flex gap-4 text-xs">
+                      {deal.value > 0 && (
+                        <span className="text-muted-foreground">
+                          Value: <span className="text-foreground font-medium">${deal.value.toLocaleString()}</span>
+                        </span>
+                      )}
+                      {deal.earnestMoney && (
+                        <span className="text-muted-foreground">
+                          EMD: <span className="text-foreground font-medium">${Number(deal.earnestMoney).toLocaleString()}</span>
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

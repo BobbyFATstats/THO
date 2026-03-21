@@ -4,7 +4,41 @@ import {
   getOpportunities,
   getContacts,
   PIPELINE_IDS,
+  type Opportunity,
 } from "@/lib/ghl";
+
+// GHL custom field ID → dashboard field name
+const DISP_FIELD_MAP: Record<string, string> = {
+  bKwe0xJQTKZmgo2WynUK: "address",
+  LCZuQzVmjpOnNL28J5fg: "contractType",
+  oOVFdoXZwLlM6aIb5P2Y: "closeOfEscrow",
+  XH9MnewkDybk35T3Xq4l: "earnestMoney",
+  roHzit7ZgNDZkH2lnUO5: "inspectionPeriodDays",
+  azqaPEYzwC7myXYmhQCK: "dealStatus",
+};
+
+function parseDispositionFields(opp: Opportunity) {
+  const fields: Record<string, string | number | null> = {
+    address: null,
+    contractType: null,
+    contractSignedDate: null, // placeholder — not in GHL
+    inspectionPeriodDays: null,
+    emdDueDate: null, // placeholder — not in GHL
+    emdSent: null, // placeholder — not in GHL
+    closeOfEscrow: null,
+    earnestMoney: null,
+    dealStatus: null,
+  };
+
+  for (const cf of opp.customFields || []) {
+    const fieldName = DISP_FIELD_MAP[cf.id];
+    if (fieldName) {
+      fields[fieldName] = cf.fieldValueString ?? cf.fieldValue ?? null;
+    }
+  }
+
+  return fields;
+}
 
 export async function GET() {
   try {
@@ -84,6 +118,7 @@ export async function GET() {
           value: o.monetaryValue,
           stage: o.stageName,
           createdAt: o.createdAt,
+          ...parseDispositionFields(o),
         })),
       },
       contacts: {
