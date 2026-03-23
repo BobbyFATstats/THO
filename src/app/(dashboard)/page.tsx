@@ -26,8 +26,8 @@ export default function DashboardPage() {
   const { data: itemsData, mutate: mutateItems } = useActionItems();
   const { data: topicsData } = useTopics();
   const { data: ghlData, mutate: mutateGhl } = useSWR<{
-    contacts: { total: number; recentCount: number; byAssignee: Record<string, number> };
-    opportunities: { recentCount: number };
+    contacts: { total: number; buyerCount: number; prevBuyerCount: number };
+    acquisitionActivity: { recentCount: number; prevCount: number };
     refreshedAt: string;
     error?: string;
   }>("/api/ghl", fetcher, { revalidateOnFocus: false });
