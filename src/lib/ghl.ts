@@ -63,7 +63,10 @@ export async function getPipelines(): Promise<Pipeline[]> {
     `${BASE_URL}/opportunities/pipelines?locationId=${getLocationId()}`,
     { headers: getHeaders() }
   );
-  if (!res.ok) throw new Error(`GHL pipelines: ${res.status}`);
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`GHL pipelines: ${res.status} ${body}`);
+  }
   const data = await res.json();
   return data.pipelines;
 }
@@ -73,10 +76,13 @@ export async function getOpportunities(
   limit = 100
 ): Promise<{ opportunities: Opportunity[]; total: number }> {
   const res = await fetch(
-    `${BASE_URL}/opportunities/search?location_id=${getLocationId()}&pipeline_id=${pipelineId}&limit=${limit}`,
+    `${BASE_URL}/opportunities/search?locationId=${getLocationId()}&pipelineId=${pipelineId}&limit=${limit}`,
     { headers: getHeaders() }
   );
-  if (!res.ok) throw new Error(`GHL opportunities: ${res.status}`);
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`GHL opportunities: ${res.status} ${body}`);
+  }
   const data = await res.json();
   return {
     opportunities: data.opportunities || [],
@@ -91,7 +97,10 @@ export async function getContacts(
     `${BASE_URL}/contacts/?locationId=${getLocationId()}&limit=${limit}`,
     { headers: getHeaders() }
   );
-  if (!res.ok) throw new Error(`GHL contacts: ${res.status}`);
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`GHL contacts: ${res.status} ${body}`);
+  }
   const data = await res.json();
   return {
     contacts: data.contacts || [],
@@ -112,7 +121,10 @@ export async function getUsers(): Promise<GHLUser[]> {
     `${BASE_URL}/users/?locationId=${getLocationId()}`,
     { headers: getHeaders() }
   );
-  if (!res.ok) throw new Error(`GHL users: ${res.status}`);
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`GHL users: ${res.status} ${body}`);
+  }
   const data = await res.json();
   return data.users || [];
 }
