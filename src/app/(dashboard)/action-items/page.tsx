@@ -46,6 +46,7 @@ import type { ActionItem } from "@/lib/types";
 import type { Status, Priority } from "@/lib/constants";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import Link from "next/link";
 
 const ALL = "__all__";
 
@@ -298,13 +299,22 @@ export default function ActionItemsPage() {
                     </Button>
                   )}
 
-                  {/* Source & Date */}
+                  {/* Source & Meeting Date */}
                   <Badge variant="secondary" className="text-xs shrink-0">
                     {item.source === "ai_extracted" ? "AI" : "Manual"}
                   </Badge>
-                  <span className="text-xs text-muted-foreground shrink-0">
-                    {format(new Date(item.created_at), "MMM d")}
-                  </span>
+                  {item.meetings?.date ? (
+                    <Link
+                      href={`/meetings/${item.meeting_id}`}
+                      className="text-xs text-muted-foreground shrink-0 hover:text-primary hover:underline"
+                    >
+                      {format(new Date(item.meetings.date + "T00:00:00"), "MMM d")} call
+                    </Link>
+                  ) : (
+                    <span className="text-xs text-muted-foreground shrink-0">
+                      {format(new Date(item.created_at), "MMM d")}
+                    </span>
+                  )}
                 </div>
               </SortableItem>
             ))}

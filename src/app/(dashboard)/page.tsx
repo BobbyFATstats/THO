@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import useSWR from "swr";
 import { useActionItems } from "@/lib/hooks/use-action-items";
 import { useMeetings } from "@/lib/hooks/use-meetings";
 import { useTopics } from "@/lib/hooks/use-topics";
@@ -10,15 +12,37 @@ import { ConfidenceIndicator } from "@/components/confidence-indicator";
 import { AddActionItemDialog } from "@/components/add-action-item-dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { CATEGORY_LABELS, CONFIDENCE_THRESHOLDS } from "@/lib/constants";
 import type { Category } from "@/lib/constants";
 import { format } from "date-fns";
+import { RefreshCw } from "lucide-react";
 import Link from "next/link";
+
+const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 export default function DashboardPage() {
   const { data: meetingsData } = useMeetings(1);
   const { data: itemsData, mutate: mutateItems } = useActionItems();
   const { data: topicsData } = useTopics();
+  const { data: ghlData, mutate: mutateGhl } = useSWR<{
+    contacts: { total: number; recentCount: number; byAssignee: Record<string, number> };
+    opportunities: { recentCount: number };
+    refreshedAt: string;
+    error?: string;
+  }>("/api/ghl", fetcher, { revalidateOnFocus: false });
+  const [refreshing, setRefreshing] = useState(false);
+
+  async function handleRefreshGhl() {
+    setRefreshing(true);
+    try {
+      const res = await fetch("/api/ghl", { method: "POST" });
+      const fresh = await res.json();
+      mutateGhl(fresh, false);
+    } finally {
+      setRefreshing(false);
+    }
+  }
 
   const latestMeeting = meetingsData?.meetings?.[0];
   const allItems = itemsData?.action_items || [];
@@ -53,9 +77,49 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
+        <div className="flex items-center gap-3">
+          <div>
+            <h1 className="text-2xl font-bold">Dashboard</h1>
+            {ghlData?.refreshedAt && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Last refreshed: {format(new Date(ghlData.refreshedAt), "MMM d, yyyy h:mm a")}
+              </p>
+            )}
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRefreshGhl}
+            disabled={refreshing}
+          >
+            <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${refreshing ? "animate-spin" : ""}`} />
+            {refreshing ? "Refreshing..." : "Refresh GHL"}
+          </Button>
+        </div>
         <AddActionItemDialog onCreated={() => mutateItems()} />
       </div>
+
+      {/* GHL Weekly Stats */}
+      {ghlData && !ghlData.error && (
+        <div className="grid grid-cols-4 gap-4">
+          <StatsCard
+            label="Contacts — Carla (7d)"
+            value={ghlData.contacts.byAssignee?.["Carla"] || 0}
+          />
+          <StatsCard
+            label="Contacts — Tammy (7d)"
+            value={ghlData.contacts.byAssignee?.["Tammy"] || 0}
+          />
+          <StatsCard
+            label="Total Contacts (7d)"
+            value={ghlData.contacts.recentCount}
+          />
+          <StatsCard
+            label="New Opportunities (7d)"
+            value={ghlData.opportunities.recentCount}
+          />
+        </div>
+      )}
 
       {/* Latest meeting summary */}
       {latestMeeting && (
@@ -113,6 +177,11 @@ export default function DashboardPage() {
                   <ConfidenceIndicator score={item.confidence_score} />
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
+                  {item.meetings?.date ? (
+                    <span className="text-xs text-muted-foreground">
+                      {format(new Date(item.meetings.date + "T00:00:00"), "MMM d")}
+                    </span>
+                  ) : null}
                   {item.assignee && (
                     <Badge variant="outline" className="text-xs">
                       {item.assignee}

@@ -1,17 +1,21 @@
 "use client";
 
+import { useState } from "react";
 import useSWR from "swr";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { StatsCard } from "@/components/stats-card";
 import { Separator } from "@/components/ui/separator";
 import { format } from "date-fns";
+import { RefreshCw } from "lucide-react";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 type StageInfo = { id: string; name: string; position: number };
 
 type GHLData = {
+  refreshedAt?: string;
   acquisition: {
     total: number;
     byStage: Record<string, number>;
@@ -83,9 +87,21 @@ function StageBadge({ stage }: { stage: string }) {
 }
 
 export default function CrmTrackerPage() {
-  const { data, error, isLoading } = useSWR<GHLData>("/api/ghl", fetcher, {
-    refreshInterval: 300000, // refresh every 5 min
+  const { data, error, isLoading, mutate } = useSWR<GHLData>("/api/ghl", fetcher, {
+    revalidateOnFocus: false,
   });
+  const [refreshing, setRefreshing] = useState(false);
+
+  async function handleRefresh() {
+    setRefreshing(true);
+    try {
+      const res = await fetch("/api/ghl", { method: "POST" });
+      const fresh = await res.json();
+      mutate(fresh, false);
+    } finally {
+      setRefreshing(false);
+    }
+  }
 
   if (isLoading) {
     return (
@@ -115,7 +131,25 @@ export default function CrmTrackerPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">CRM Tracker</h1>
+      <div className="flex items-center gap-3">
+        <div>
+          <h1 className="text-2xl font-bold">CRM Tracker</h1>
+          {data.refreshedAt && (
+            <p className="text-xs text-muted-foreground mt-1">
+              Last refreshed: {format(new Date(data.refreshedAt), "MMM d, yyyy h:mm a")}
+            </p>
+          )}
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleRefresh}
+          disabled={refreshing}
+        >
+          <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${refreshing ? "animate-spin" : ""}`} />
+          {refreshing ? "Refreshing..." : "Refresh GHL"}
+        </Button>
+      </div>
 
       {/* Top stats */}
       <div className="grid grid-cols-4 gap-4">

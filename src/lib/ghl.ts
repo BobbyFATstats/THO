@@ -97,6 +97,24 @@ export async function getContacts(
   };
 }
 
+export type GHLUser = {
+  id: string;
+  name: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+};
+
+export async function getUsers(): Promise<GHLUser[]> {
+  const res = await fetch(
+    `${BASE_URL}/users/search?locationId=${getLocationId()}&limit=100`,
+    { headers: getHeaders() }
+  );
+  if (!res.ok) throw new Error(`GHL users: ${res.status}`);
+  const data = await res.json();
+  return data.users || [];
+}
+
 // Pipeline IDs for THO
 export const PIPELINE_IDS = {
   acquisition: "AnuA711OZ2a5o4jMZ8kC",

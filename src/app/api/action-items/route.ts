@@ -12,7 +12,7 @@ export async function GET(request: Request) {
   const supabase = createServiceClient();
   let query = supabase
     .from("action_items")
-    .select("*")
+    .select("*, meetings(date)")
     .order("priority")
     .order("sort_order");
 

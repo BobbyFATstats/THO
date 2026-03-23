@@ -25,6 +25,7 @@ export type ActionItem = {
   created_at: string;
   updated_at: string;
   completed_at: string | null;
+  meetings?: { date: string } | null;
 };
 
 export type DiscussionTopic = {
