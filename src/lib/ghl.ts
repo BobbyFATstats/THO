@@ -107,7 +107,7 @@ export type GHLUser = {
 
 export async function getUsers(): Promise<GHLUser[]> {
   const res = await fetch(
-    `${BASE_URL}/users/search?locationId=${getLocationId()}&limit=100`,
+    `${BASE_URL}/users/?locationId=${getLocationId()}`,
     { headers: getHeaders() }
   );
   if (!res.ok) throw new Error(`GHL users: ${res.status}`);

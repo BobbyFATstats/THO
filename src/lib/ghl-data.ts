@@ -49,7 +49,7 @@ export async function fetchGHLData() {
       getOpportunities(PIPELINE_IDS.acquisition),
       getOpportunities(PIPELINE_IDS.disposition),
       getContacts(100),
-      getUsers(),
+      getUsers().catch(() => [] as Awaited<ReturnType<typeof getUsers>>),
     ]);
 
   const userNameMap = Object.fromEntries(
