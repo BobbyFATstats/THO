@@ -48,7 +48,7 @@ export async function fetchGHLData() {
       getPipelines(),
       getOpportunities(PIPELINE_IDS.acquisition),
       getOpportunities(PIPELINE_IDS.disposition),
-      getContacts(100),
+      getContacts(200),
       getUsers().catch(() => [] as Awaited<ReturnType<typeof getUsers>>),
     ]);
 
@@ -84,27 +84,32 @@ export async function fetchGHLData() {
   }));
 
   const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-  const recentContacts = contactsData.contacts.filter(
-    (c) => new Date(c.dateAdded) > weekAgo
-  );
+  const twoWeeksAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
 
-  // Filter to buyer contacts: any tag containing "buyer" (case-insensitive)
-  const buyerContacts = recentContacts.filter((c) =>
-    (c.tags || []).some((tag) => tag.toLowerCase().includes("buyer"))
-  );
+  // Buyer contacts: any tag containing "buyer" (case-insensitive)
+  const isBuyer = (c: { tags?: string[] }) =>
+    (c.tags || []).some((tag) => tag.toLowerCase().includes("buyer"));
 
-  // Group by creator using followers array (first follower = creator)
-  const buyersByCreator: Record<string, number> = {};
-  for (const c of buyerContacts) {
-    const creatorId = c.followers?.[0];
-    const name = creatorId ? userNameMap[creatorId] || "Unknown" : "Unknown";
-    buyersByCreator[name] = (buyersByCreator[name] || 0) + 1;
-  }
+  const buyerCount = contactsData.contacts.filter(
+    (c) => new Date(c.dateAdded) > weekAgo && isBuyer(c)
+  ).length;
+  const prevBuyerCount = contactsData.contacts.filter(
+    (c) => {
+      const d = new Date(c.dateAdded);
+      return d > twoWeeksAgo && d <= weekAgo && isBuyer(c);
+    }
+  ).length;
 
-  const allOpps = [...acquisition.opportunities, ...disposition.opportunities];
-  const recentOpportunities = allOpps.filter(
+  // Acquisition opportunities: current vs previous week
+  const acqRecentCount = acquisition.opportunities.filter(
     (o) => new Date(o.createdAt) > weekAgo
-  );
+  ).length;
+  const acqPrevCount = acquisition.opportunities.filter(
+    (o) => {
+      const d = new Date(o.createdAt);
+      return d > twoWeeksAgo && d <= weekAgo;
+    }
+  ).length;
 
   const acqByStage: Record<string, number> = {};
   for (const o of acqOpps) {
@@ -149,13 +154,12 @@ export async function fetchGHLData() {
     },
     contacts: {
       total: contactsData.total,
-      recentCount: recentContacts.length,
-      buyerCount: buyerContacts.length,
-      buyerGoal: 10,
-      buyersByCreator,
+      buyerCount,
+      prevBuyerCount,
     },
-    opportunities: {
-      recentCount: recentOpportunities.length,
+    acquisitionActivity: {
+      recentCount: acqRecentCount,
+      prevCount: acqPrevCount,
     },
   };
 }
