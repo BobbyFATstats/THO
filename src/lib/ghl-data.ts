@@ -52,8 +52,13 @@ export async function fetchGHLData() {
       getUsers().catch(() => [] as Awaited<ReturnType<typeof getUsers>>),
     ]);
 
+  // GHL name overrides (when GHL has a misspelling)
+  const NAME_OVERRIDES: Record<string, string> = {
+    G9S5bkni8KLtpDBPcyUa: "Karla",
+  };
+
   const userNameMap = Object.fromEntries(
-    users.map((u) => [u.id, u.firstName || u.name])
+    users.map((u) => [u.id, NAME_OVERRIDES[u.id] || u.firstName || u.name])
   );
 
   const acqPipeline = pipelines.find((p) => p.id === PIPELINE_IDS.acquisition);

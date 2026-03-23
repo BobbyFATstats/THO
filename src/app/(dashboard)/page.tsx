@@ -103,8 +103,8 @@ export default function DashboardPage() {
       {ghlData && !ghlData.error && (
         <div className="grid grid-cols-4 gap-4">
           <StatsCard
-            label="Contacts — Carla (7d)"
-            value={ghlData.contacts.byAssignee?.["Carla"] || 0}
+            label="Contacts — Karla (7d)"
+            value={ghlData.contacts.byAssignee?.["Karla"] || 0}
           />
           <StatsCard
             label="Contacts — Tammy (7d)"
