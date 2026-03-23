@@ -88,12 +88,17 @@ export async function fetchGHLData() {
     (c) => new Date(c.dateAdded) > weekAgo
   );
 
-  const contactsByAssignee: Record<string, number> = {};
-  for (const c of recentContacts) {
-    const name = c.assignedTo
-      ? userNameMap[c.assignedTo] || "Unknown"
-      : "Unassigned";
-    contactsByAssignee[name] = (contactsByAssignee[name] || 0) + 1;
+  // Filter to buyer contacts: any tag containing "buyer" (case-insensitive)
+  const buyerContacts = recentContacts.filter((c) =>
+    (c.tags || []).some((tag) => tag.toLowerCase().includes("buyer"))
+  );
+
+  // Group by creator using followers array (first follower = creator)
+  const buyersByCreator: Record<string, number> = {};
+  for (const c of buyerContacts) {
+    const creatorId = c.followers?.[0];
+    const name = creatorId ? userNameMap[creatorId] || "Unknown" : "Unknown";
+    buyersByCreator[name] = (buyersByCreator[name] || 0) + 1;
   }
 
   const allOpps = [...acquisition.opportunities, ...disposition.opportunities];
@@ -145,7 +150,9 @@ export async function fetchGHLData() {
     contacts: {
       total: contactsData.total,
       recentCount: recentContacts.length,
-      byAssignee: contactsByAssignee,
+      buyerCount: buyerContacts.length,
+      buyerGoal: 10,
+      buyersByCreator,
     },
     opportunities: {
       recentCount: recentOpportunities.length,

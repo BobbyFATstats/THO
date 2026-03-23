@@ -101,14 +101,18 @@ export default function DashboardPage() {
 
       {/* GHL Weekly Stats */}
       {ghlData && !ghlData.error && (
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           <StatsCard
-            label="Contacts — Karla (7d)"
-            value={ghlData.contacts.byAssignee?.["Karla"] || 0}
-          />
-          <StatsCard
-            label="Contacts — Tammy (7d)"
-            value={ghlData.contacts.byAssignee?.["Tammy"] || 0}
+            label="Buyer Contacts (7d)"
+            value={`${ghlData.contacts.buyerCount ?? 0} / ${ghlData.contacts.buyerGoal ?? 10}`}
+            tooltip={
+              ghlData.contacts.buyersByCreator &&
+              Object.keys(ghlData.contacts.buyersByCreator).length > 0
+                ? Object.entries(ghlData.contacts.buyersByCreator)
+                    .map(([name, count]) => `${name}: ${count}`)
+                    .join("\n")
+                : "No buyer contacts this week"
+            }
           />
           <StatsCard
             label="Total Contacts (7d)"

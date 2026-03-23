@@ -54,6 +54,8 @@ export type GHLContact = {
   assignedTo: string | null;
   dateAdded: string;
   source: string | null;
+  tags: string[];
+  followers: string[];
 };
 
 export async function getPipelines(): Promise<Pipeline[]> {
