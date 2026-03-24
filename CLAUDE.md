@@ -562,18 +562,49 @@ Deploy: push to `master`. GitHub Actions auto-deploys.
 
 ## Session Log Protocol
 
-Update `SESSION_LOG.md` at the end of every Claude Code session.
-One entry per session. Most recent at the top.
+**This is MANDATORY. Every Claude Code session MUST end with a session log — no exceptions.**
+This applies whether the session was planning, execution, debugging, or discussion.
+
+Session logs live in `sessions/` as individual files. Use `sessions/TEMPLATE.md` as the format.
+
+**Naming convention:** `sessions/YYYY-MM-DD-[short-slug].md`
+Example: `sessions/2026-03-24-fix-ghl-422.md`
+
+If multiple sessions happen on the same day, append a letter: `2026-03-24b-dashboard-refactor.md`
+
+**When to write the session log:**
+- At the END of every session, before signing off
+- After completing a plan (even if no code was written — log what was planned and decided)
+- After executing changes (log what changed, what was deployed, what broke)
+- After debugging (log root cause, fix, and what to watch for)
+
+**What goes in the session log (follows `sessions/TEMPLATE.md`):**
 
 ```markdown
-## [DATE] — Session N: [one-line summary of what happened]
-- What was built or changed (specific files)
-- Decisions made this session (summarize, link DECISIONS.md if logged there)
-- Blockers encountered
-- Current build step status
-- Next: [exactly what to work on next session]
-- Open questions: [anything unresolved]
+# Session Summary
+
+**Date:** YYYY-MM-DD
+**Focus:** [one-line description of what this session was about]
+
+## What Got Done
+- [specific changes, files modified, features built]
+
+## Decisions Made
+- [every non-trivial decision — also log to DECISIONS.md]
+
+## Open Items / Next Steps
+- [exactly what to pick up next session]
+
+## Files Changed
+- [list of files added/modified/deleted]
+
+## Memory Updates
+- Preferences learned: [anything new about how Bobby wants things done]
+- Decisions to log: [pointer to DECISIONS.md entries if applicable]
 ```
+
+**Cross-reference rule:** Any decision logged in the session log MUST also be added to `DECISIONS.md`.
+The session log captures the narrative; `DECISIONS.md` is the searchable index.
 
 ---
 
@@ -582,11 +613,16 @@ One entry per session. Most recent at the top.
 Log every non-trivial decision to `DECISIONS.md` as it's made.
 Format: `| [DATE] | [Topic] | [Options] | [Chosen] | [Why — 1-2 sentences] |`
 
+**This happens IN REAL TIME — not just at session end.**
+When a decision is made during the session, log it to `DECISIONS.md` immediately.
+Then reference it in the session log at the end.
+
 **Decisions worth logging:**
 - Tool selections (which MCP, which library, which database)
 - Model assignment changes from defaults
 - Architecture deviations from the standard WAT pattern
 - Pipeline stage additions or removals
+- Bug fixes and root causes (what broke, why, how it was fixed)
 - Cost-saving tradeoffs
 - Any decision you might question or revisit later
 
