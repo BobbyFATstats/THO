@@ -22,7 +22,7 @@ import Link from "next/link";
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 export default function DashboardPage() {
-  const { data: meetingsData } = useMeetings(1);
+  const { data: meetingsData, mutate: mutateMeetings } = useMeetings(1);
   const { data: itemsData, mutate: mutateItems } = useActionItems();
   const { data: topicsData } = useTopics();
   const { data: ghlData, mutate: mutateGhl } = useSWR<{
@@ -32,6 +32,8 @@ export default function DashboardPage() {
     error?: string;
   }>("/api/ghl", fetcher, { revalidateOnFocus: false });
   const [refreshing, setRefreshing] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState<string | null>(null);
 
   async function handleRefreshGhl() {
     setRefreshing(true);
@@ -41,6 +43,29 @@ export default function DashboardPage() {
       mutateGhl(fresh, false);
     } finally {
       setRefreshing(false);
+    }
+  }
+
+  async function handleSyncMeetings() {
+    setSyncing(true);
+    setSyncResult(null);
+    try {
+      const res = await fetch("/api/ingest", { method: "POST" });
+      const result = await res.json();
+      if (result.error) {
+        setSyncResult(`Error: ${result.error}`);
+      } else if (result.processed > 0) {
+        setSyncResult(`Synced ${result.processed} new meeting(s)`);
+        mutateMeetings();
+      } else if (result.found === 0) {
+        setSyncResult("No new meetings found");
+      } else {
+        setSyncResult(`${result.found} found, all already synced`);
+      }
+    } catch {
+      setSyncResult("Sync failed");
+    } finally {
+      setSyncing(false);
     }
   }
 
@@ -95,6 +120,18 @@ export default function DashboardPage() {
             <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${refreshing ? "animate-spin" : ""}`} />
             {refreshing ? "Refreshing..." : "Refresh GHL"}
           </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleSyncMeetings}
+            disabled={syncing}
+          >
+            <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${syncing ? "animate-spin" : ""}`} />
+            {syncing ? "Syncing..." : "Sync Meetings"}
+          </Button>
+          {syncResult && (
+            <span className="text-xs text-muted-foreground">{syncResult}</span>
+          )}
         </div>
         <AddActionItemDialog onCreated={() => mutateItems()} />
       </div>

@@ -59,9 +59,16 @@ export async function getTodayRecordings(
   date?: string
 ): Promise<ZoomRecording[]> {
   const targetDate = date || new Date().toISOString().split("T")[0];
+  return getRecordingsInRange(accessToken, targetDate, targetDate);
+}
 
+export async function getRecordingsInRange(
+  accessToken: string,
+  from: string,
+  to: string
+): Promise<ZoomRecording[]> {
   const response = await fetch(
-    `https://api.zoom.us/v2/users/me/recordings?from=${targetDate}&to=${targetDate}`,
+    `https://api.zoom.us/v2/users/me/recordings?from=${from}&to=${to}`,
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -77,7 +84,7 @@ export async function getTodayRecordings(
   const data: ZoomRecordingsResponse = await response.json();
 
   // Filter for "THO Daily Stand-Up" meetings (case-insensitive partial match)
-  return data.meetings.filter((m) =>
+  return (data.meetings || []).filter((m) =>
     m.topic.toLowerCase().includes("tho daily stand-up")
   );
 }

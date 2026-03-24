@@ -48,7 +48,7 @@ export async function fetchGHLData() {
       getPipelines(),
       getOpportunities(PIPELINE_IDS.acquisition),
       getOpportunities(PIPELINE_IDS.disposition),
-      getContacts(200),
+      getContacts(100),
       getUsers().catch(() => [] as Awaited<ReturnType<typeof getUsers>>),
     ]);
 

@@ -75,10 +75,20 @@ export async function getOpportunities(
   pipelineId: string,
   limit = 100
 ): Promise<{ opportunities: Opportunity[]; total: number }> {
-  const res = await fetch(
-    `${BASE_URL}/opportunities/search?locationId=${getLocationId()}&pipelineId=${pipelineId}&limit=${limit}`,
-    { headers: getHeaders() }
-  );
+  const params = new URLSearchParams({
+    pipeline_id: pipelineId,
+    limit: String(limit),
+  });
+  const res = await fetch(`${BASE_URL}/opportunities/search?${params}`, {
+    method: "POST",
+    headers: {
+      ...getHeaders(),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      locationId: getLocationId(),
+    }),
+  });
   if (!res.ok) {
     const body = await res.text().catch(() => "");
     throw new Error(`GHL opportunities: ${res.status} ${body}`);
