@@ -76,18 +76,12 @@ export async function getOpportunities(
   limit = 100
 ): Promise<{ opportunities: Opportunity[]; total: number }> {
   const params = new URLSearchParams({
+    location_id: getLocationId(),
     pipeline_id: pipelineId,
     limit: String(limit),
   });
   const res = await fetch(`${BASE_URL}/opportunities/search?${params}`, {
-    method: "POST",
-    headers: {
-      ...getHeaders(),
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      locationId: getLocationId(),
-    }),
+    headers: getHeaders(),
   });
   if (!res.ok) {
     const body = await res.text().catch(() => "");
@@ -96,7 +90,7 @@ export async function getOpportunities(
   const data = await res.json();
   return {
     opportunities: data.opportunities || [],
-    total: data.meta?.total || 0,
+    total: data.meta?.total || data.opportunities?.length || 0,
   };
 }
 

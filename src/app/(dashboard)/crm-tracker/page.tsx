@@ -52,7 +52,12 @@ type GHLData = {
   };
   contacts: {
     total: number;
+    buyerCount: number;
+    prevBuyerCount: number;
+  };
+  acquisitionActivity: {
     recentCount: number;
+    prevCount: number;
   };
   error?: string;
 };
@@ -155,8 +160,16 @@ export default function CrmTrackerPage() {
       <div className="grid grid-cols-4 gap-4">
         <StatsCard label="Acquisition Pipeline" value={data.acquisition.total} />
         <StatsCard label="Disposition Pipeline" value={data.disposition.total} />
-        <StatsCard label="Under Contract" value={data.acquisition.underContract.length} />
-        <StatsCard label="Total Contacts" value={data.contacts.total} />
+        <StatsCard
+          label="New Acq. Opps (7d)"
+          value={data.acquisitionActivity?.recentCount ?? 0}
+          prevValue={data.acquisitionActivity?.prevCount}
+        />
+        <StatsCard
+          label="Buyer Leads (7d)"
+          value={data.contacts.buyerCount ?? 0}
+          prevValue={data.contacts.prevBuyerCount}
+        />
       </div>
 
       <div className="grid grid-cols-2 gap-6">

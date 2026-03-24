@@ -125,6 +125,20 @@ export async function fetchGHLData() {
     (o) => o.stageName === "Under Contract"
   );
 
+  // Only show disposition deals in active stages (Marketing Active and beyond)
+  const DISPOSITION_ACTIVE_STAGES = [
+    "Marketing Active",
+    "Buyer Negotiations",
+    "Buyer Selected",
+    "Escrow Opened",
+    "Inspection / Access",
+    "Clear to Close",
+  ];
+
+  const activeDispDeals = dispOpps.filter((o) =>
+    DISPOSITION_ACTIVE_STAGES.includes(o.stageName)
+  );
+
   return {
     acquisition: {
       total: acquisition.total,
@@ -143,7 +157,7 @@ export async function fetchGHLData() {
       total: disposition.total,
       byStage: dispByStage,
       stages: dispPipeline?.stages || [],
-      deals: dispOpps.slice(0, 20).map((o) => ({
+      deals: activeDispDeals.slice(0, 20).map((o) => ({
         id: o.id,
         name: o.contact?.name || o.name,
         value: o.monetaryValue,
