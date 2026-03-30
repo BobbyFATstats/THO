@@ -244,7 +244,7 @@ export default function TopicsPage() {
                       {/* Date */}
                       <span className="text-xs text-muted-foreground shrink-0">
                         {topic.meetings?.date
-                          ? format(new Date(topic.meetings.date), "MMM d")
+                          ? format(new Date(topic.meetings.date + "T00:00:00"), "MMM d")
                           : ""}
                       </span>
                     </div>

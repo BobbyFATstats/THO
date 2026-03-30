@@ -60,7 +60,7 @@ export default function MeetingDetailPage({
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">
-            {format(new Date(meeting.date), "EEEE, MMMM d, yyyy")}
+            {format(new Date(meeting.date + "T00:00:00"), "EEEE, MMMM d, yyyy")}
           </h1>
           <p className="text-sm text-muted-foreground">Meeting Detail</p>
         </div>

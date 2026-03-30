@@ -6,6 +6,7 @@ type ZoomTokenResponse = {
 
 type ZoomRecording = {
   id: string;
+  uuid: string;
   topic: string;
   start_time: string;
   recording_files: {

@@ -58,7 +58,7 @@ export async function ingestRecordings(
   }
 
   for (const recording of recordings) {
-    const zoomMeetingId = String(recording.id);
+    const zoomMeetingId = recording.uuid || String(recording.id);
 
     // Idempotency check
     const { data: existing } = await supabase

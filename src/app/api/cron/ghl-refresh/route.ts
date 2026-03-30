@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { requireCronAuth } from "@/lib/api";
 import { refreshGHLCache } from "@/lib/ghl-data";
 
-export async function POST(request: Request) {
+export async function GET(request: Request) {
   const authError = requireCronAuth(request);
   if (authError) return authError;
 

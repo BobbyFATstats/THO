@@ -159,7 +159,7 @@ export default function DashboardPage() {
             <CardTitle className="text-base font-medium flex items-center gap-2">
               Latest Meeting
               <span className="text-sm text-muted-foreground font-normal">
-                {format(new Date(latestMeeting.date), "EEEE, MMMM d, yyyy")}
+                {format(new Date(latestMeeting.date + "T00:00:00"), "EEEE, MMMM d, yyyy")}
               </span>
             </CardTitle>
           </CardHeader>

@@ -96,7 +96,7 @@ export function Sidebar() {
                   : "text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground"
               )}
             >
-              {format(new Date(meeting.date), "MMM d, yyyy")}
+              {format(new Date(meeting.date + "T00:00:00"), "MMM d, yyyy")}
             </Link>
           );
         })}

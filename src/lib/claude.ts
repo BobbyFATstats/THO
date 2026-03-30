@@ -138,6 +138,10 @@ export async function extractMeetingData(
 
   const input = toolUse.input as ExtractionResult;
 
+  // Ensure arrays exist even if Claude omits them
+  if (!Array.isArray(input.action_items)) input.action_items = [];
+  if (!Array.isArray(input.discussion_topics)) input.discussion_topics = [];
+
   // Validate and clamp confidence scores
   for (const item of input.action_items) {
     item.confidence = Math.max(0, Math.min(1, item.confidence));
