@@ -14,6 +14,8 @@ import type {
 
 const DRY_RUN = process.argv.includes("--dry-run");
 
+async function main() {
+
 const data: BuyerPipelineData = JSON.parse(
   readFileSync(".tmp/buyer-pipeline-data.json", "utf-8")
 );
@@ -218,3 +220,10 @@ console.log(`   Successful: ${successCount}`);
 console.log(`   Failed: ${failCount}`);
 console.log(`   Skipped (no changes needed): ${skipCount}`);
 console.log(`   Written to: .tmp/changes-applied.json`);
+
+}
+
+main().catch((err) => {
+  console.error("Fatal error:", err);
+  process.exit(1);
+});
