@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     const handle = await tasks.trigger(
       "buyer-blast",
       { opportunityId },
-      { idempotencyKey: `buyer-blast-${opportunityId}` }
+      { idempotencyKey: `buyer-blast-${opportunityId}-${Date.now()}` }
     );
 
     return NextResponse.json({
