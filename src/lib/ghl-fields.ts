@@ -7,7 +7,6 @@ import { getOpportunityCustomFields } from "@/lib/ghl";
 const BLAST_FIELD_KEYS: Record<string, string> = {
   city: "opportunity.city",
   state: "opportunity.state_abbrv",
-  state_full: "opportunity.state",
   bedroom_count: "opportunity.bedroom_count",
   bathroom_count: "opportunity.bathroom_count",
   property_square_footage: "opportunity.property_square_footage",
@@ -76,10 +75,6 @@ export function extractDealData(
     if (name) {
       dealData[name] = String(cf.fieldValueString ?? cf.fieldValue ?? "");
     }
-  }
-  // Fall back to full state name if abbreviated is empty
-  if (!dealData.state && dealData.state_full) {
-    dealData.state = dealData.state_full;
   }
   return dealData;
 }
