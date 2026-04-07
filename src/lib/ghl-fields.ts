@@ -73,7 +73,7 @@ export function extractDealData(
   for (const cf of customFields) {
     const name = idToName.get(cf.id);
     if (name) {
-      dealData[name] = cf.fieldValueString ?? cf.fieldValue ?? "";
+      dealData[name] = String(cf.fieldValueString ?? cf.fieldValue ?? "");
     }
   }
   return dealData;
@@ -91,5 +91,5 @@ export function getMissingFields(dealData: Record<string, string>): string[] {
     "property_square_footage",
     "property_cross_streets",
   ];
-  return required.filter((f) => !dealData[f] || dealData[f].trim() === "");
+  return required.filter((f) => !dealData[f] || String(dealData[f]).trim() === "");
 }
