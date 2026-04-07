@@ -72,7 +72,7 @@ async function scanForOldTypeContacts(
   alreadyFetched: Set<string>
 ): Promise<string[]> {
   const needsFetch: string[] = [];
-  let startAfterId: string | undefined;
+  let cursor: { startAfterId: string; startAfter: number } | undefined;
   let scanned = 0;
   let page = 0;
 
@@ -80,10 +80,11 @@ async function scanForOldTypeContacts(
 
   while (true) {
     page++;
-    const result = await fetchContactsPage(startAfterId || undefined);
+    const result = await fetchContactsPage(cursor);
     scanned += result.contacts.length;
 
-    if (page % 5 === 0) console.log(`  Scanned ${scanned} contacts (page ${page})...`);
+    if (page % 5 === 0 || page === 1)
+      console.log(`  Page ${page}: scanned ${scanned}/${result.total} contacts...`);
 
     for (const c of result.contacts) {
       if (!alreadyFetched.has(c.id)) {
@@ -91,8 +92,8 @@ async function scanForOldTypeContacts(
       }
     }
 
-    if (result.contacts.length === 0 || !result.startAfterId) break;
-    startAfterId = result.startAfterId;
+    if (result.contacts.length === 0 || !result.nextCursor) break;
+    cursor = result.nextCursor;
   }
 
   console.log(`  Total scanned: ${scanned}. Need to check ${needsFetch.length} non-pipeline contacts.`);

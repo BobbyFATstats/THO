@@ -125,17 +125,21 @@ export async function fetchContact(
  * Used for scanning all contacts to find old Contact Type values.
  */
 export async function fetchContactsPage(
-  startAfterId?: string
+  cursor?: { startAfterId: string; startAfter: number }
 ): Promise<{
   contacts: { id: string; tags: string[]; firstName: string; lastName: string }[];
-  startAfterId: string | null;
+  nextCursor: { startAfterId: string; startAfter: number } | null;
+  total: number;
 }> {
   await sleep(600);
   const params = new URLSearchParams({
     locationId: getLocationId(),
     limit: "100",
   });
-  if (startAfterId) params.set("startAfterId", startAfterId);
+  if (cursor) {
+    params.set("startAfterId", cursor.startAfterId);
+    params.set("startAfter", String(cursor.startAfter));
+  }
 
   const res = await fetchWithRetry(`${BASE_URL}/contacts/?${params}`, {
     headers: getHeaders(),
@@ -143,9 +147,14 @@ export async function fetchContactsPage(
   if (!res.ok)
     throw new Error(`GHL contacts page: ${res.status} ${await res.text()}`);
   const data = await res.json();
+  const meta = data.meta || {};
   return {
     contacts: data.contacts || [],
-    startAfterId: data.meta?.startAfterId ?? null,
+    nextCursor:
+      meta.startAfterId && meta.startAfter
+        ? { startAfterId: meta.startAfterId, startAfter: meta.startAfter }
+        : null,
+    total: meta.total || 0,
   };
 }
 
