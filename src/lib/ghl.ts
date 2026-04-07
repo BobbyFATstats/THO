@@ -236,12 +236,13 @@ export async function createContactTask(params: {
   assignedTo: string;
   dueDate?: string;
 }): Promise<{ taskId: string }> {
-  const payload: Record<string, string> = {
+  const payload: Record<string, unknown> = {
     title: params.title,
     body: params.body,
     assignedTo: params.assignedTo,
+    dueDate: params.dueDate || new Date(Date.now() + 86400000).toISOString(),
+    completed: false,
   };
-  if (params.dueDate) payload.dueDate = params.dueDate;
 
   const res = await fetch(`${BASE_URL}/contacts/${params.contactId}/tasks`, {
     method: "POST",
