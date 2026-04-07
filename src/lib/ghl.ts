@@ -241,7 +241,7 @@ export async function createConversation(contactId: string): Promise<string> {
 }
 
 export async function sendSMS(params: {
-  conversationId: string;
+  contactId: string;
   message: string;
 }): Promise<{ messageId: string }> {
   const res = await fetch(`${BASE_URL}/conversations/messages`, {
@@ -249,7 +249,7 @@ export async function sendSMS(params: {
     headers: { ...getHeaders(), "Content-Type": "application/json" },
     body: JSON.stringify({
       type: "SMS",
-      conversationId: params.conversationId,
+      contactId: params.contactId,
       message: params.message,
     }),
   });

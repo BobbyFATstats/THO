@@ -2,8 +2,6 @@ import { task, wait } from "@trigger.dev/sdk/v3";
 import {
   getOpportunity,
   searchContacts,
-  searchConversation,
-  createConversation,
   sendSMS,
   createContactTask,
   getUsers,
@@ -253,18 +251,16 @@ async function runDripLoop(
       }
 
       try {
-        let conversationId = await searchConversation(recipient.contact_id);
-        if (!conversationId) {
-          conversationId = await createConversation(recipient.contact_id);
-        }
-
         const message = await buildMessage(
           recipient.language as "en" | "es",
           recipient.contact_name || "there",
           dealData
         );
 
-        const { messageId } = await sendSMS({ conversationId, message });
+        const { messageId } = await sendSMS({
+          contactId: recipient.contact_id,
+          message,
+        });
 
         await updateRecipient(recipient.id, {
           status: "sent",
