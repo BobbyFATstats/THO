@@ -177,6 +177,38 @@ export async function getContactsPaginated(params: {
   };
 }
 
+export async function searchContacts(params: {
+  tags: string[];
+  page?: number;
+  pageLimit?: number;
+}): Promise<{ contacts: GHLContact[]; total: number }> {
+  const filters = params.tags.map((tag) => ({
+    field: "tags",
+    operator: "contains",
+    value: tag,
+  }));
+
+  const res = await fetch(`${BASE_URL}/contacts/search`, {
+    method: "POST",
+    headers: { ...getHeaders(), "Content-Type": "application/json" },
+    body: JSON.stringify({
+      locationId: getLocationId(),
+      filters,
+      page: params.page || 1,
+      pageLimit: params.pageLimit || 100,
+    }),
+  });
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`GHL searchContacts: ${res.status} ${body}`);
+  }
+  const data = await res.json();
+  return {
+    contacts: data.contacts || [],
+    total: data.total || 0,
+  };
+}
+
 export async function searchConversation(contactId: string): Promise<string | null> {
   const queryParams = new URLSearchParams({
     locationId: getLocationId(),

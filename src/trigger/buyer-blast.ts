@@ -1,7 +1,7 @@
 import { task, wait } from "@trigger.dev/sdk/v3";
 import {
   getOpportunity,
-  getContactsPaginated,
+  searchContacts,
   searchConversation,
   createConversation,
   sendSMS,
@@ -125,23 +125,21 @@ type EligibleBuyer = {
 
 async function fetchEligibleBuyers(): Promise<EligibleBuyer[]> {
   const buyers: EligibleBuyer[] = [];
-  let startAfterId: string | undefined;
 
+  // Use GHL search endpoint to filter by tags server-side
+  // TEST MODE: include "test" tag — remove when going live
+  // TODO: Remove "test" from this array when ready for all buyers
+  const requiredTags = ["buyer", "ready to go", "test"];
+
+  let page = 1;
   while (true) {
-    const page = await getContactsPaginated({
-      limit: 100,
-      startAfterId,
+    const result = await searchContacts({
+      tags: requiredTags,
+      page,
+      pageLimit: 100,
     });
 
-    for (const contact of page.contacts) {
-      const tags = (contact.tags || []).map((t) => t.toLowerCase());
-      if (!tags.includes("buyer")) continue;
-      if (!tags.includes("ready to go")) continue;
-
-      // TEST MODE: only include contacts with "test" tag
-      // TODO: Remove this filter when ready to go live with all buyers
-      if (!tags.includes("test")) continue;
-
+    for (const contact of result.contacts) {
       // Check DND — dnd is a boolean, dndSettings is an object keyed by channel
       const dnd = (contact as Record<string, unknown>).dnd as boolean | undefined;
       if (dnd === true) continue;
@@ -161,7 +159,6 @@ async function fetchEligibleBuyers(): Promise<EligibleBuyer[]> {
 
       if (customFields) {
         for (const cf of customFields) {
-          // value can be a string or array of strings
           const vals = Array.isArray(cf.value) ? cf.value : [cf.value];
           for (const v of vals) {
             if (String(v || "").toLowerCase().includes("spanish")) {
@@ -181,8 +178,9 @@ async function fetchEligibleBuyers(): Promise<EligibleBuyer[]> {
       });
     }
 
-    if (!page.nextPageUrl || page.contacts.length === 0) break;
-    startAfterId = page.contacts[page.contacts.length - 1].id;
+    // Stop when we've fetched all results
+    if (result.contacts.length < 100 || buyers.length >= result.total) break;
+    page++;
   }
 
   return buyers;
