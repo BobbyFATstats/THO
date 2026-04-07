@@ -60,11 +60,12 @@ Main Orchestrator (this session)
 **Phase 1 — Fetch (sequential):** Subagent 1 runs first — fetches all data, writes to `.tmp/buyer-pipeline-data.json`
 
 **Phase 2 — Analyze (parallel, read-only):** Subagents 2-5 run in parallel. Each reads the shared data file and **computes** which contacts need fixes, but does NOT write to GHL. Each writes a proposed change set to `.tmp/`:
-- `.tmp/proposed-buyer-tag.json`
-- `.tmp/proposed-contact-type.json`
-- `.tmp/proposed-need-info.json`
-- `.tmp/proposed-old-type-migration.json`
+- `.tmp/proposed-buyer-tags.json` (covers both buyer tag + Contact Type multi-select)
+- `.tmp/proposed-missing-info.json`
+- `.tmp/proposed-old-type.json`
 - `.tmp/proposed-tag-normalize.json`
+
+**Note:** Buyer tag and Contact Type checks are combined into one analyzer since they target the same contacts (all Buyer Pipeline contacts) and are tightly coupled.
 
 **Why read-only in Phase 2:** Multiple subagents may need to modify the same contact (e.g., Subagent 2 adds "buyer" tag while Subagent 5 removes "#phoenix" tag on the same contact). If they both PUT simultaneously, the second write overwrites the first. By computing in parallel and applying in a single merge step, we avoid race conditions.
 
@@ -104,7 +105,8 @@ scripts/cleanup/
 **Rate limiting:** GHL API allows ~100 requests/minute. Each subagent will:
 - Use 600ms delay between API calls
 - Handle 429s with exponential backoff (3 retries)
-- Since subagents 2-5 run in parallel and all hit the GHL API, they share a rate limiter via a simple token bucket written to `.tmp/rate-limit.lock`
+- Analyzers (Phase 2) are read-only — they read from `.tmp/buyer-pipeline-data.json` and don't hit the GHL API, so no rate limiting needed in that phase
+- Only the data fetcher (Phase 1) and merge-and-apply (Phase 3) make API calls
 
 **Estimated runtime:** ~15-20 minutes total (data fetch ~8-10 min, parallel fixes ~5-8 min, QA ~2 min)
 
