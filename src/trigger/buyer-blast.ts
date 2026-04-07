@@ -138,6 +138,10 @@ async function fetchEligibleBuyers(): Promise<EligibleBuyer[]> {
       if (!tags.includes("buyer")) continue;
       if (!tags.includes("ready to go")) continue;
 
+      // TEST MODE: only include contacts with "test" tag
+      // TODO: Remove this filter when ready to go live with all buyers
+      if (!tags.includes("test")) continue;
+
       // Check DND
       const dnd = (contact as Record<string, unknown>).dnd as boolean | undefined;
       const dndArray = (contact as Record<string, unknown>).dndSettings as
