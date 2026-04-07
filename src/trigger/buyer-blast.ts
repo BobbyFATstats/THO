@@ -142,16 +142,17 @@ async function fetchEligibleBuyers(): Promise<EligibleBuyer[]> {
       // TODO: Remove this filter when ready to go live with all buyers
       if (!tags.includes("test")) continue;
 
-      // Check DND
+      // Check DND — dnd is a boolean, dndSettings is an object keyed by channel
       const dnd = (contact as Record<string, unknown>).dnd as boolean | undefined;
-      const dndArray = (contact as Record<string, unknown>).dndSettings as
-        | { status: string; message: string; code: string }[]
-        | undefined;
-
       if (dnd === true) continue;
-      if (dndArray?.some((d) => d.code === "SMS" && d.status === "active")) continue;
 
-      // Determine language from custom fields or top-level field
+      const dndSettings = (contact as Record<string, unknown>).dndSettings as
+        | Record<string, { status: string; code: string; message: string }>
+        | undefined;
+      if (dndSettings?.SMS?.status === "active") continue;
+
+      // Determine language from contact custom fields
+      // GHL contact customFields have shape: { id: string, value: string | string[] }
       let language: "en" | "es" = "en";
 
       const customFields = (contact as Record<string, unknown>).customFields as
@@ -160,19 +161,16 @@ async function fetchEligibleBuyers(): Promise<EligibleBuyer[]> {
 
       if (customFields) {
         for (const cf of customFields) {
-          const val = String(cf.value || "").toLowerCase();
-          if (val.includes("spanish")) {
-            language = "es";
-            break;
+          // value can be a string or array of strings
+          const vals = Array.isArray(cf.value) ? cf.value : [cf.value];
+          for (const v of vals) {
+            if (String(v || "").toLowerCase().includes("spanish")) {
+              language = "es";
+              break;
+            }
           }
+          if (language === "es") break;
         }
-      }
-
-      const preferredLang = String(
-        (contact as Record<string, unknown>).preferredLanguage || ""
-      ).toLowerCase();
-      if (preferredLang.includes("spanish")) {
-        language = "es";
       }
 
       buyers.push({
